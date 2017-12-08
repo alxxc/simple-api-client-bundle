@@ -1,0 +1,22 @@
+{
+  "name": "alxxc/simple-api-client-bundle",
+  "type": "symfony-bundle",
+  "description": "Symfony SimpleApiClientBundle",
+  "license": "MIT",
+  "require": {
+    "php": ">=7.0.12",
+    "symfony/dependency-injection": "~3.0|~4.0",
+    "symfony/config": "~3.0|~4.0",
+    "guzzlehttp/guzzle": "~6.0",
+    "symfony/serializer": "~3.4"
+  },
+  "require-dev": {
+    "symfony/yaml": "~3.0|~4.0",
+    "phpunit/phpunit": "~6.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "SimpleApiClientBundle\\": ""
+    }
+  }
+}
