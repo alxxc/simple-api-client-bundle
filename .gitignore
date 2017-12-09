@@ -1,3 +1,5 @@
 Tests/app/cache
 Tests/app/logs
+vendor
+composer.lock
 .idea

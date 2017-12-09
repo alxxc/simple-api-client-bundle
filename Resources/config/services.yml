@@ -1,7 +1,6 @@
 services:
-#    simple_api_client.example:
-#        class: Alxxc\SimpleApiClientBundle\Example
-#        arguments: ["@service_id", "plain_value", "%parameter%"]
     simple_api_client.client:
         class: SimpleApiClientBundle\Service\ApiClient
+        arguments:
+          - 20 # timeout
         public: true

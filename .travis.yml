@@ -1,0 +1,17 @@
+language: php
+sudo: false
+
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+
+before_install:
+  - composer self-update
+
+install:
+  - composer update --prefer-dist --no-interaction
+
+script:
+  - php -S localhost:8000 -t Tests/Stubs/web/ &
+  - vendor/bin/phpunit -v
