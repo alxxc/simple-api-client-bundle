@@ -24,3 +24,11 @@ Add the SimpleApiClientBundle to your application's kernel (if needed):
         ...
     }
 ```
+
+## Usage
+
+Bundle provides service simple_api_client.client for loading locations data
+
+```php
+    $container->get('simple_api_client.client')->loadLocations($url);
+```
