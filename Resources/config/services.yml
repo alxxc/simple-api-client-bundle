@@ -1,6 +1,9 @@
 services:
+    simple_api_client.transport.guzzle:
+        class: SimpleApiClientBundle\Service\Transport\GuzzleAdaptor
+
     simple_api_client.client:
         class: SimpleApiClientBundle\Service\ApiClient
         arguments:
-          - 20 # timeout
+          - '@simple_api_client.transport.guzzle'
         public: true

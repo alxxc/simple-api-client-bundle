@@ -4,6 +4,7 @@ namespace SimpleApiClientBundle\Service;
 use SimpleApiClientBundle\Entity\Location;
 use SimpleApiClientBundle\Exception\BadResponseException;
 use SimpleApiClientBundle\Exception\ResponseMalformedException;
+use SimpleApiClientBundle\Service\Transport\TransportInterface;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
@@ -11,29 +12,11 @@ use Symfony\Component\Serializer\Serializer;
 
 class ApiClient
 {
-    /**
-     * @var string|null
-     */
-    private $baseUri = null;
+    private $transport;
 
-    /**
-     * @var int
-     */
-    private $timeout = 0;
-
-    /**
-     * @var bool
-     */
-    private $allow_redirects = false;
-
-    /**
-     * @var string|null
-     */
-    private $proxy = null;
-
-    public function __construct($timeout = 0)
+    public function __construct(TransportInterface $transport)
     {
-        $this->timeout = $timeout;
+        $this->transport = $transport;
     }
 
     /**
@@ -44,23 +27,12 @@ class ApiClient
      * @throws BadResponseException
      * @throws ResponseMalformedException
      */
-    public function loadLocations($uri)
+    public function loadLocations(string $uri)
     {
-        $client = new \GuzzleHttp\Client([
-            'base_uri' => $this->baseUri,
-            'timeout' => $this->timeout,
-            'allow_redirects' => $this->allow_redirects,
-            'proxy' => $this->proxy,
-        ]);
-
-        $response = $client
+        $response = $this->transport
             ->request('GET', $uri);
 
-        // @todo process status code? $response->getStatusCode(); // 200
-
-        $body = $response->getBody();
-
-        $data = $this->processResponse($body);
+        $data = $this->processResponse($response);
 
         return $this->denormalizeLocations($data);
     }
@@ -71,7 +43,7 @@ class ApiClient
      * @throws BadResponseException
      * @throws ResponseMalformedException
      */
-    protected function processResponse($response)
+    protected function processResponse(string $response)
     {
         $jsonData = \GuzzleHttp\json_decode($response);
 
@@ -85,7 +57,7 @@ class ApiClient
             } elseif (!empty($jsonData->message)) {
                 throw new BadResponseException($jsonData->message);
             } else {
-                throw new ResponseMalformedException('Error code is empty');
+                throw new ResponseMalformedException('Error message is empty');
             }
         } else {
             throw new ResponseMalformedException('Field "success" is not defined');
@@ -96,7 +68,7 @@ class ApiClient
      * @param array $data
      * @return Location[]
      */
-    protected function denormalizeLocations($data)
+    protected function denormalizeLocations(array $data)
     {
         $normalizer = new GetSetMethodNormalizer(null, null, new ReflectionExtractor());
         $serializer = new Serializer([
@@ -105,78 +77,5 @@ class ApiClient
         ]);
 
         return $serializer->denormalize($data, Location::class.'[]');
-    }
-
-
-    /**
-     * @return null
-     */
-    public function getBaseUri()
-    {
-        return $this->baseUri;
-    }
-
-    /**
-     * @param null $baseUri
-     * @return self
-     */
-    public function setBaseUri($baseUri)
-    {
-        $this->baseUri = $baseUri;
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getTimeout()
-    {
-        return $this->timeout;
-    }
-
-    /**
-     * @param int $timeout
-     * @return self
-     */
-    public function setTimeout($timeout)
-    {
-        $this->timeout = $timeout;
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isAllowRedirects()
-    {
-        return $this->allow_redirects;
-    }
-
-    /**
-     * @param bool $allow_redirects
-     * @return self
-     */
-    public function setAllowRedirects($allow_redirects)
-    {
-        $this->allow_redirects = $allow_redirects;
-        return $this;
-    }
-
-    /**
-     * @return null
-     */
-    public function getProxy()
-    {
-        return $this->proxy;
-    }
-
-    /**
-     * @param null $proxy
-     * @return self
-     */
-    public function setProxy($proxy)
-    {
-        $this->proxy = $proxy;
-        return $this;
     }
 }
